@@ -1,0 +1,33 @@
+// 🔧 1. buildscript 블록 추가
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://naver.jfrog.io/artifactory/maven/" }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
+}
+
+// 🔧 2. 기존 allprojects 블록은 이렇게만 남겨요
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://naver.jfrog.io/artifactory/maven/" }
+    }
+}
+
+// 🔧 3. 나머지 설정은 그대로 유지
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

@@ -1,0 +1,20 @@
+                        -H/opt/homebrew/Caskroom/flutter/3.24.5/flutter/packages/flutter_tools/gradle/src/main/groovy
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=23
+-DANDROID_PLATFORM=android-23
+-DANDROID_ABI=x86
+-DCMAKE_ANDROID_ARCH_ABI=x86
+-DANDROID_NDK=/Users/jeongminseog/Library/Android/sdk/ndk/26.3.11579264
+-DCMAKE_ANDROID_NDK=/Users/jeongminseog/Library/Android/sdk/ndk/26.3.11579264
+-DCMAKE_TOOLCHAIN_FILE=/Users/jeongminseog/Library/Android/sdk/ndk/26.3.11579264/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/jeongminseog/Library/Android/sdk/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/jeongminseog/Desktop/정민석/smart_backhome/smart_safe_return/build/app/intermediates/cxx/Debug/5c1z1t27/obj/x86
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/jeongminseog/Desktop/정민석/smart_backhome/smart_safe_return/build/app/intermediates/cxx/Debug/5c1z1t27/obj/x86
+-DCMAKE_BUILD_TYPE=Debug
+-B/Users/jeongminseog/Desktop/정민석/smart_backhome/smart_safe_return/android/app/.cxx/Debug/5c1z1t27/x86
+-GNinja
+-Wno-dev
+--no-warn-unused-cli
+                        Build command args: []
+                        Version: 2
