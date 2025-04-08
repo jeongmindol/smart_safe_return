@@ -22,9 +22,6 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
-                <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-                <uses-permission android:name="android.permission.LOCATION_ALWAYS"/>
-                <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

@@ -41,7 +41,7 @@ class _IdPwSearchTabState extends State<IdPwSearchTab>
           controller: _tabController,
           indicatorColor: Colors.black,
           labelColor: Colors.black,
-          unselectedLabelColor: Colors.black, // ✨ 글씨를 항상 검은색으로
+          unselectedLabelColor: Colors.black,
           tabs: const [
             Tab(text: '아이디 찾기'),
             Tab(text: '비밀번호 찾기'),
@@ -55,7 +55,6 @@ class _IdPwSearchTabState extends State<IdPwSearchTab>
           Padding(
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
-              // 🔹 여기에 SingleChildScrollView 추가
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -104,7 +103,7 @@ class _IdPwSearchTabState extends State<IdPwSearchTab>
                       ],
                     ),
                   ],
-                  const Spacer(),
+                  const SizedBox(height: 30), // 여기 수정!
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -128,7 +127,6 @@ class _IdPwSearchTabState extends State<IdPwSearchTab>
           Padding(
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
-              // 🔹 여기에 SingleChildScrollView 추가
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -185,7 +183,7 @@ class _IdPwSearchTabState extends State<IdPwSearchTab>
                       ],
                     ),
                   ],
-                  const Spacer(),
+                  const SizedBox(height: 30), // 여기도 수정!
                   SizedBox(
                     width: double.infinity,
                     height: 50,

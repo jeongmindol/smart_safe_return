@@ -25,10 +25,11 @@ android {
     defaultConfig {
         // ✅ 고유한 앱 ID 설정
         applicationId = "com.example.smart_safe_return"
-        minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion 23
+        targetSdkVersion 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
     }
 
     buildTypes {
@@ -37,6 +38,11 @@ android {
         }
     }
 }
+
+// dependencies {
+//     // ✅ 네이버 지도 SDK 추가
+//     implementation "com.naver.maps:map-sdk:3.19.1"
+// }
 
 flutter {
     source = "../.."
