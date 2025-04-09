@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_safe_return/components/setting/user/user.dart';
 import 'package:smart_safe_return/provider/setting/user/user_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();
@@ -15,8 +16,7 @@ Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
   // 백엔드 로그아웃 요청
   if (refreshToken != null && accessToken != null) {
     try {
-      final url = Uri.parse(
-        'https://smart-safe-return-backend-88013499747.asia-northeast2.run.app/api/auth/logout',
+      final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/auth/logout',
       );
 
       final response = await http.post(

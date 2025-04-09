@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final jwtProvider = StateProvider<Map<String, String?>>((ref) => {});
 
@@ -35,8 +36,7 @@ Future<void> checkAutoLogin(WidgetRef ref, BuildContext context) async {
 
 /// ✅ 로그인 시도 함수
 Future<bool> login(WidgetRef ref, String id, String password) async {
-  final url = Uri.parse(
-    'https://smart-safe-return-backend-88013499747.asia-northeast2.run.app/api/auth/login',
+  final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/auth/login',
   );
 
   final response = await http.post(
