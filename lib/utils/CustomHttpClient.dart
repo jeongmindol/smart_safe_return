@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CustomHttpClient extends http.BaseClient {
   final http.Client _inner = http.Client();
@@ -23,9 +24,9 @@ class CustomHttpClient extends http.BaseClient {
     if (response.statusCode == 401 && refreshToken != null) {
       print('🔄 액세스토큰 만료, 재발급 시도...');
 
-      final reissueUrl = Uri.parse('https://smart-safe-return-backend-88013499747.asia-northeast2.run.app/api/reissue');
+      final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/reissue');
       final reissueResponse = await http.post(
-        reissueUrl,
+        url,
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Refresh': 'Bearer $refreshToken',
@@ -33,8 +34,10 @@ class CustomHttpClient extends http.BaseClient {
       );
 
       if (reissueResponse.statusCode == 200) {
-        final newAccessToken = reissueResponse.headers['authorization']?.replaceFirst('Bearer ', '');
-        final newRefreshToken = reissueResponse.headers['refresh']?.replaceFirst('Bearer ', '');
+        final newAccessToken = reissueResponse.headers['authorization']
+            ?.replaceFirst('Bearer ', '');
+        final newRefreshToken =
+            reissueResponse.headers['refresh']?.replaceFirst('Bearer ', '');
 
         if (newAccessToken != null && newRefreshToken != null) {
           // 새 토큰 저장

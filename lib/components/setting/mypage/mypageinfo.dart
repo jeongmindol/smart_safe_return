@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smart_safe_return/components/setting/user/user.dart';
+import 'package:smart_safe_return/components/setting/user/user.dart'; // 로그인 페이지
 import 'package:smart_safe_return/provider/setting/user/user_provider.dart';
 import 'package:smart_safe_return/provider/setting/mypage/mypageinfo_provider.dart';
+import 'package:smart_safe_return/components/setting/profile/myprofile.dart'; // 내 정보 수정 페이지
 
 class MyPageInfo extends ConsumerWidget {
   const MyPageInfo({super.key});
@@ -12,7 +13,7 @@ class MyPageInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final jwt = ref.watch(jwtProvider);
     final id = jwt['id'];
-    final isIdValid = id != null && id.trim().isNotEmpty;
+    final isLoggedIn = id != null && id.trim().isNotEmpty;
 
     print('🧪 jwtProvider 상태: $jwt');
     print('🧪 id 값: $id');
@@ -31,27 +32,50 @@ class MyPageInfo extends ConsumerWidget {
                   backgroundColor: CupertinoColors.inactiveGray,
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isIdValid ? '$id 님' : '불러오는 중...',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                GestureDetector(
+                  onTap: () {
+                    if (isLoggedIn) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyProfile(),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const UserPage(),
+                        ),
+                      );
+                    }
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isLoggedIn ? '$id 님' : '로그인을 해주세요',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const Text(
-                      '안전 귀가 이용자',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
+                      const Text(
+                        '안전 귀가 이용자',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.logout),
                   onPressed: () {
-                    handleLogout(context, ref);
+                    if (isLoggedIn) {
+                      handleLogout(context, ref);
+                    } else {
+                      print("❗ 로그아웃 상태에서는 로그아웃 버튼이 작동하지 않아요");
+                    }
                   },
                 ),
               ],

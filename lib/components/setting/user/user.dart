@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_safe_return/components/navbar/bottom_bar.dart';
-import 'package:smart_safe_return/components/setting/user/siginup.dart';
+import 'package:smart_safe_return/components/setting/user/signup.dart';
 import 'package:smart_safe_return/components/setting/user/idpw_search_tab.dart';
 import 'package:smart_safe_return/provider/setting/user/user_provider.dart';
 
