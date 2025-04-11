@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_safe_return/components/navbar/bottom_bar.dart';
 import 'package:smart_safe_return/components/setting/user/signup.dart';
-import 'package:smart_safe_return/components/setting/user/idpw_search_tab.dart';
+import 'package:smart_safe_return/components/setting/user/id_search.dart';
+import 'package:smart_safe_return/components/setting/user/pw_search.dart';
 import 'package:smart_safe_return/provider/setting/user/user_provider.dart';
+import 'package:smart_safe_return/provider/popup_box/popup_box.dart'; // ✅ 팝업 import
 
 class UserPage extends ConsumerStatefulWidget {
   const UserPage({super.key});
@@ -65,18 +67,13 @@ class _UserPageState extends ConsumerState<UserPage> {
                     final pw = pwController.text.trim();
 
                     if (id.isEmpty || pw.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')),
-                      );
+                      showLoginInputEmptyPopup(context); // ✅ 입력 누락 팝업
                       return;
                     }
 
                     final success = await login(ref, id, pw);
                     if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('로그인 성공!')),
-                      );
-
+                      // ✅ 팝업 없이 바로 마이페이지로 이동
                       if (mounted) {
                         Navigator.pushReplacement(
                           context,
@@ -84,10 +81,7 @@ class _UserPageState extends ConsumerState<UserPage> {
                         );
                       }
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('로그인 실패. 아이디 또는 비밀번호를 확인하세요')),
-                      );
+                      showLoginFailedPopup(context); // ❌ 실패는 여전히 팝업으로 안내
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -105,7 +99,7 @@ class _UserPageState extends ConsumerState<UserPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const IdPwSearchTab()),
+                          MaterialPageRoute(builder: (_) => const IdSearchPage()),
                         );
                       },
                       child: const Text('아이디 찾기'),
@@ -114,7 +108,7 @@ class _UserPageState extends ConsumerState<UserPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const IdPwSearchTab()),
+                          MaterialPageRoute(builder: (_) => const PwSearchPage()),
                         );
                       },
                       child: const Text('비밀번호 찾기'),

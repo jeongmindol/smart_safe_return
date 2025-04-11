@@ -224,7 +224,7 @@ class _SignupPageState extends State<SignupPage> {
                     ElevatedButton(
                       onPressed: handleVerifyRequest,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('재전송'),
