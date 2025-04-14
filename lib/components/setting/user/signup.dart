@@ -58,9 +58,7 @@ class _SignupPageState extends State<SignupPage> {
       } else {
         timer.cancel();
         setState(() => isVerifying = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⏰ 인증 시간이 만료되었습니다')),
-        );
+        showVerificationTimeoutPopup(context);
       }
     });
   }
@@ -68,13 +66,11 @@ class _SignupPageState extends State<SignupPage> {
   void handleVerifyRequest() async {
     final phone = phoneController.text.trim();
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('연락처를 입력해주세요')),
-      );
+      showEmptyPhonePopup(context);
       return;
     }
 
-    final id = await requestSmsVerification(phone);
+    final id = await requestSmsVerification(context, phone); // ✅ context 포함!
     if (id != null) {
       setState(() {
         verificationId = id;
@@ -82,17 +78,13 @@ class _SignupPageState extends State<SignupPage> {
         remainingSeconds = 180;
       });
       startTimer();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ 인증번호가 전송되었습니다')),
-      );
+      showVerificationSentPopup(context);
     }
   }
 
   void handleCodeSubmit() async {
     if (verificationId == null || codeController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('인증번호를 입력해주세요')),
-      );
+      showEnterVerificationCodePopup(context);
       return;
     }
 
@@ -110,15 +102,17 @@ class _SignupPageState extends State<SignupPage> {
         timer?.cancel();
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('❌ 인증번호가 틀렸습니다')),
-      );
+      showInvalidCodePopup(context);
     }
   }
 
   void handleIdCheckWrapper() async {
     final id = idController.text.trim();
-    if (id.isEmpty) return;
+    if (id.isEmpty) {
+      showEmptyIdPopup(context);
+      return;
+    }
+
     final isDup = await checkIdDuplicate(id);
     setState(() {
       isIdAvailable = isDup == false;
@@ -242,7 +236,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 onChanged: (_) => setState(() {}),
               ),
-               const SizedBox(height: 20),
+              const SizedBox(height: 20),
               const Text('프로필 이미지'),
               GestureDetector(
                 onTap: _pickImage,
@@ -347,7 +341,6 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  /// 체크박스 스타일 함수 (왼쪽 서클 + Signature 색상)
   Widget buildCheckbox(String text, bool value, Function(bool?) onChanged) {
     return CheckboxListTile(
       value: value,

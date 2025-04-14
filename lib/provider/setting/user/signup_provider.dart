@@ -5,9 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smart_safe_return/components/setting/user/user.dart';
+import 'package:smart_safe_return/provider/popup_box/popup_box.dart';
 
 /// 연락처 SMS 인증 요청
-Future<int?> requestSmsVerification(String phone) async {
+Future<int?> requestSmsVerification(BuildContext context, String phone) async {
   final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/verification/signup/sms');
 
   try {
@@ -16,8 +17,14 @@ Future<int?> requestSmsVerification(String phone) async {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'phone': phone}),
     );
+
     if (response.statusCode == 200) {
       return int.tryParse(response.body);
+    } else if (response.statusCode == 400 &&
+        response.body.contains('이미 등록된 휴대폰 번호')) {
+      if (context.mounted) {
+        showPhoneAlreadyRegisteredPopup(context); // ❗ 팝업 표시
+      }
     }
   } catch (e) {
     print('❌ SMS 인증 요청 오류: $e');
@@ -109,9 +116,7 @@ Future<void> handleSignup(
   final phone = phoneController.text.trim();
 
   if (id.isEmpty || pw.isEmpty || phone.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('모든 필드를 입력해주세요')),
-    );
+    showEmptySignupFieldPopup(context);
     return;
   }
 
@@ -130,9 +135,7 @@ Future<void> handleSignup(
       MaterialPageRoute(builder: (context) => const UserPage()),
     );
   } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('회원가입에 실패했습니다')),
-    );
+    showSignupFailedPopup(context);
   }
 }
 

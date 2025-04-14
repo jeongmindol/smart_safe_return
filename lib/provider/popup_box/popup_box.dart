@@ -1,6 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:smart_safe_return/components/setting/user/user.dart';
 
+/// ✅ 공통 팝업 함수
+void showPopup(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+      actionsPadding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+      actionsAlignment: MainAxisAlignment.end,
+      content: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 16,
+            height: 2,
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('확인'),
+        ),
+      ],
+    ),
+  );
+}
+
 /// ✅ 로그인 필요 팝업
 void showLoginRequiredPopup(BuildContext context) {
   showDialog(
@@ -55,36 +85,6 @@ void showLoginRequiredPopup(BuildContext context) {
   );
 }
 
-/// ✅ 공통 알림 팝업
-void showPopup(BuildContext context, String message) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-      actionsPadding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
-      actionsAlignment: MainAxisAlignment.end,
-      content: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            height: 2,
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('확인'),
-        ),
-      ],
-    ),
-  );
-}
-
 /// ✅ 아이디 관련 팝업
 void showEmptyIdPopup(BuildContext context) {
   showPopup(context, '아이디를 입력해주세요');
@@ -111,9 +111,25 @@ void showUnregisteredPhonePopup(BuildContext context) {
   showPopup(context, '아이디 또는 연락처가 일치하지 않습니다\n다시 입력해주세요');
 }
 
+void showPhoneAlreadyRegisteredPopup(BuildContext context) {
+  showPopup(context, '이미 등록된 연락처입니다');
+}
+
 /// ✅ 인증 코드 관련 팝업
 void showInvalidCodePopup(BuildContext context) {
-  showPopup(context, '인증 코드가 올바르지 않아요.');
+  showPopup(context, '❌ 인증번호가 틀렸습니다');
+}
+
+void showVerificationTimeoutPopup(BuildContext context) {
+  showPopup(context, '⏰ 인증 시간이 만료되었습니다');
+}
+
+void showVerificationSentPopup(BuildContext context) {
+  showPopup(context, '✅ 인증번호가 전송되었습니다');
+}
+
+void showEnterVerificationCodePopup(BuildContext context) {
+  showPopup(context, '인증번호를 입력해주세요');
 }
 
 /// ✅ 로그인 관련 팝업
@@ -156,6 +172,15 @@ void showPasswordChangeUnauthorizedPopup(BuildContext context) {
 
 void showPasswordChangeErrorPopup(BuildContext context, Object error) {
   showPopup(context, '요청 중 오류가 발생했어요:\n$error');
+}
+
+/// ✅ 회원가입 관련 팝업
+void showSignupFailedPopup(BuildContext context) {
+  showPopup(context, '회원가입에 실패했습니다');
+}
+
+void showEmptySignupFieldPopup(BuildContext context) {
+  showPopup(context, '모든 필드를 입력해주세요');
 }
 
 /// ✅ 비밀번호 변경 성공 후 로그인 이동 팝업
