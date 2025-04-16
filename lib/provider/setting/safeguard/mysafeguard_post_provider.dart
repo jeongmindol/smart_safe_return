@@ -24,7 +24,6 @@ class MySafeguardPostProvider {
       var response = await _postRequest(accessToken, memberNumber, name, phone);
 
       if (response.statusCode == 403) {
-        // 🔁 AccessToken 재발급 시도
         final refreshToken = prefs.getString('Refresh');
         if (refreshToken == null || refreshToken.isEmpty) {
           throw Exception('RefreshToken 없음');
@@ -49,20 +48,12 @@ class MySafeguardPostProvider {
         }
       }
 
-      if (response.statusCode == 200) {
-        debugPrint("✅ 등록 성공!");
-        return true;
-      } else {
-        debugPrint("❌ 등록 실패: ${response.statusCode} - ${response.body}");
-        return false;
-      }
-    } catch (e) {
-      debugPrint("⚠️ 등록 중 오류: $e");
+      return response.statusCode == 200;
+    } catch (_) {
       return false;
     }
   }
 
-  /// ✅ 내부 POST 요청
   Future<http.Response> _postRequest(
       String token, int memberNumber, String name, String phone) {
     return http.post(

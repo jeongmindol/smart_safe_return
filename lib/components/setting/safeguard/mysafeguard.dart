@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ✅ 추가
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_safe_return/components/setting/safeguard/mysafeguard_post.dart';
 import 'package:smart_safe_return/components/setting/safeguard/mysafeguard_list.dart';
 
@@ -20,9 +20,10 @@ class _MySafeguardState extends State<MySafeguard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initUIStyle();
+  }
 
-    checkAccessToken(); // ✅ 콘솔에 토큰 출력
-
+  void _initUIStyle() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.white,
       statusBarIconBrightness: Brightness.dark,
@@ -30,16 +31,9 @@ class _MySafeguardState extends State<MySafeguard>
     ));
   }
 
-  /// ✅ Access Token 콘솔에 출력하는 함수
-  void checkAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('Authorization');
-    print("🪪 AccessToken = $accessToken");
-  }
-
   void addGuardian(String name, String phone) {
     listKey.currentState?.refreshGuardians();
-    _tabController.animateTo(1); // 목록 탭으로 이동
+    _tabController.animateTo(1);
   }
 
   @override

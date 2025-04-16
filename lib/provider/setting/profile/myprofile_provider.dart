@@ -6,7 +6,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smart_safe_return/provider/setting/user/user_provider.dart';
 import 'package:path/path.dart' as p;
 
-// ✅ 사용자 정보 모델
 class MemberData {
   final String id;
   final String phone;
@@ -23,7 +22,6 @@ class MemberData {
   }
 }
 
-// ✅ 사용자 정보 조회 provider
 final myProfileProvider = FutureProvider<MemberData>((ref) async {
   final jwt = ref.watch(jwtProvider);
   final memberNumber = jwt['memberNumber'];
@@ -50,7 +48,6 @@ final myProfileProvider = FutureProvider<MemberData>((ref) async {
   }
 });
 
-// ✅ 회원 정보 수정
 Future<bool> updateMyProfile({
   required WidgetRef ref,
   String? phone,
@@ -84,7 +81,6 @@ Future<bool> updateMyProfile({
   return response.statusCode == 200;
 }
 
-// ✅ 회원 탈퇴 요청
 Future<bool> deleteMyAccount(WidgetRef ref) async {
   final jwt = ref.read(jwtProvider);
   final memberNumber = jwt['memberNumber'];
@@ -106,7 +102,6 @@ Future<bool> deleteMyAccount(WidgetRef ref) async {
   return response.statusCode == 200;
 }
 
-// ✅ 비밀번호 확인 요청
 Future<bool> checkPasswordMatch({
   required WidgetRef ref,
   required String inputId,
@@ -129,12 +124,10 @@ Future<bool> checkPasswordMatch({
       'Content-Type': 'application/json',
     },
     body: jsonEncode({
-      'id' : inputId,
-      'password': inputPassword}),
+      'id': inputId,
+      'password': inputPassword,
+    }),
   );
-
-  print("비밀번호 체크 바디 = " + response.body);
-
 
   final check = response.body.trim().toLowerCase() == 'true';
   return check;

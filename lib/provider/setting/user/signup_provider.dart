@@ -23,12 +23,10 @@ Future<int?> requestSmsVerification(BuildContext context, String phone) async {
     } else if (response.statusCode == 400 &&
         response.body.contains('이미 등록된 휴대폰 번호')) {
       if (context.mounted) {
-        showPhoneAlreadyRegisteredPopup(context); // ❗ 팝업 표시
+        showPhoneAlreadyRegisteredPopup(context);
       }
     }
-  } catch (e) {
-    print('❌ SMS 인증 요청 오류: $e');
-  }
+  } catch (_) {}
   return null;
 }
 
@@ -49,8 +47,7 @@ Future<bool> verifySmsCode({
       }),
     );
     return response.statusCode == 200 && response.body == 'true';
-  } catch (e) {
-    print('❌ 인증번호 검증 오류: $e');
+  } catch (_) {
     return false;
   }
 }
@@ -66,9 +63,7 @@ Future<bool?> checkIdDuplicate(String id) async {
     if (response.statusCode == 200) {
       return response.body.trim().toLowerCase() == 'true';
     }
-  } catch (e) {
-    print('❌ 아이디 중복확인 오류: $e');
-  }
+  } catch (_) {}
   return null;
 }
 
@@ -97,8 +92,7 @@ Future<bool> signupUser({
   try {
     final response = await request.send();
     return response.statusCode == 200;
-  } catch (e) {
-    print('❌ 회원가입 요청 오류: $e');
+  } catch (_) {
     return false;
   }
 }

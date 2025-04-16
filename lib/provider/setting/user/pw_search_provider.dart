@@ -22,7 +22,6 @@ class PwSearchProvider {
   Timer? _pwTimer;
   VoidCallback? onTimerTick;
 
-  // ✅ 인증 요청
   Future<void> requestPwVerification(BuildContext context) async {
     final phone = pwPhoneController.text.trim();
     final memberId = idController.text.trim();
@@ -33,7 +32,6 @@ class PwSearchProvider {
     }
 
     final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/verification/password/sms');
-    print('📡 인증 요청 → {"phone": "$phone", "member_id": "$memberId"}');
 
     try {
       final response = await http.post(
@@ -41,8 +39,6 @@ class PwSearchProvider {
         headers: {'Content-Type': 'application/json'},
         body: '{"phone": "$phone", "member_id": "$memberId"}',
       );
-
-      print('📨 인증 응답 → ${response.statusCode}, body: ${response.body}');
 
       if (response.statusCode == 200) {
         verificationPwId = int.tryParse(response.body);
@@ -56,12 +52,9 @@ class PwSearchProvider {
       } else {
         showUnregisteredPhonePopup(context);
       }
-    } catch (e) {
-      print('❌ 인증 요청 실패: $e');
-    }
+    } catch (_) {}
   }
 
-  // ✅ 인증 코드 확인 + 토큰 저장
   Future<void> validatePwCode(BuildContext context) async {
     final phone = pwPhoneController.text.trim();
     final code = pwCodeController.text.trim();
@@ -88,8 +81,6 @@ class PwSearchProvider {
         '''.trim(),
       );
 
-      print('✅ 코드 검증 응답 → ${response.statusCode}, body: ${response.body}');
-
       if (response.statusCode == 200) {
         resetToken = response.body.replaceAll('"', '');
         isPwVerificationComplete = true;
@@ -97,23 +88,15 @@ class PwSearchProvider {
         isPwVerificationComplete = false;
         showInvalidCodePopup(context);
       }
-    } catch (e) {
-      print('❌ 인증 코드 검증 실패: $e');
+    } catch (_) {
       showInvalidCodePopup(context);
     }
   }
 
-  // ✅ 비밀번호 재설정 - 토큰 포함
   Future<String> resetPassword() async {
     final password = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
     final id = idController.text.trim();
-
-    print('🔐 비밀번호 변경 시도');
-    print('🧾 id: $id');
-    print('🔑 password: $password');
-    print('✅ 인증 완료 여부: $isPwVerificationComplete');
-    print('🪪 토큰: $resetToken');
 
     if (password.isEmpty || confirmPassword.isEmpty) {
       return '비밀번호를 모두 입력해주세요';
@@ -142,8 +125,6 @@ class PwSearchProvider {
         '''.trim(),
       );
 
-      print('📨 비밀번호 변경 응답 → ${response.statusCode}, body: ${response.body}');
-
       if (response.statusCode == 200) {
         return '비밀번호 변경이 완료되었습니다';
       } else if (response.statusCode == 403) {
@@ -152,13 +133,12 @@ class PwSearchProvider {
         return '비밀번호 변경에 실패했어요 (${response.statusCode})';
       }
     } catch (e) {
-      return '요청 중 오류가 발생했어요: $e';
+      return '요청 중 오류가 발생했어요';
     }
   }
 
   void _startPwTimer() {
     remainingPwSeconds = 180;
-
     _pwTimer?.cancel();
     _pwTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       remainingPwSeconds--;

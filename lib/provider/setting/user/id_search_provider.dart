@@ -19,19 +19,16 @@ class IdSearchProvider {
   Timer? _timer;
   VoidCallback? onTimerTick;
 
-  // 🔹 아이디 인증 요청
   Future<void> requestIdVerification(BuildContext context) async {
     if (!canResend || resendCount >= 3) return;
 
     final phone = phoneController.text.trim();
-
     if (phone.isEmpty) {
       showEmptyPhonePopup(context);
       return;
     }
 
-    final url =
-        Uri.parse('${dotenv.env['API_BASE_URL']!}/api/verification/id/sms');
+    final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/verification/id/sms');
 
     try {
       final response = await http.post(
@@ -39,9 +36,6 @@ class IdSearchProvider {
         headers: {'Content-Type': 'application/json'},
         body: '{"phone":"$phone"}',
       );
-
-      print('응답 코드: ${response.statusCode}');
-      print('응답 본문: ${response.body}');
 
       if (response.statusCode == 200) {
         verificationId = int.tryParse(response.body);
@@ -53,24 +47,20 @@ class IdSearchProvider {
           resendCount++;
           _startResendCooldown();
         }
-      } else if (response.statusCode == 400 || response.statusCode == 403 || response.statusCode == 404) {
-        showUnregisteredPhonePopup(context); // ✅ 등록되지 않은 연락처 팝업
-      } else {
-        print('❌ 알 수 없는 상태 코드: ${response.statusCode}');
+      } else if ([400, 403, 404].contains(response.statusCode)) {
+        showUnregisteredPhonePopup(context);
       }
-    } catch (e) {
-      print("❌ 아이디 인증 요청 실패: $e");
+    } catch (_) {
+      // 실패 시 무시
     }
   }
 
-  // 🔹 아이디 찾기
   Future<String?> findId() async {
     final phone = phoneController.text.trim();
     final code = codeController.text.trim();
     if (verificationId == null) return null;
 
-    final url = Uri.parse(
-        '${dotenv.env['API_BASE_URL']!}/api/verification/id/sms/validate');
+    final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/verification/id/sms/validate');
 
     try {
       final response = await http.post(
@@ -94,16 +84,13 @@ class IdSearchProvider {
 
       isVerificationComplete = false;
       return null;
-    } catch (e) {
-      print("❌ 아이디 검증 실패: $e");
+    } catch (_) {
       return null;
     }
   }
 
-  // 🔹 타이머 시작
   void _startTimer() {
     remainingSeconds = 180;
-
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       remainingSeconds--;
@@ -116,7 +103,6 @@ class IdSearchProvider {
     });
   }
 
-  // 🔹 재전송 제한 쿨다운
   void _startResendCooldown() {
     canResend = false;
     onTimerTick?.call();
@@ -127,7 +113,6 @@ class IdSearchProvider {
     });
   }
 
-  // 🔹 컨트롤러 정리
   void disposeControllers() {
     phoneController.dispose();
     codeController.dispose();
