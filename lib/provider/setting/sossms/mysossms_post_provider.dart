@@ -81,8 +81,8 @@ class SosMessagePoster {
     required BuildContext context,
     required int memberNumber,
     required String content,
-      VoidCallback? onSuccess, // ✅ 추가
-      VoidCallback? onDuplicate, // ✅ 추가
+    VoidCallback? onSuccess,
+    VoidCallback? onDuplicate,
   }) async {
     try {
       final response = await _authorizedPost(apiUrl, {
@@ -92,20 +92,18 @@ class SosMessagePoster {
 
       if (response.statusCode == 200) {
         showPopup(context, '메세지 등록이 완료되었습니다.');
-        onSuccess?.call(); // ✅ 성공 시 콜백 실행
+        onSuccess?.call();
       } else {
         final decoded = utf8.decode(response.bodyBytes);
-        print('🔴 [SOS 등록 실패 응답]: $decoded');
 
         if (decoded.toLowerCase().contains('duplicate sosmessage')) {
           showPopup(context, '이미 등록된 메세지가 있습니다.');
-          onDuplicate?.call(); // ✅ 중복 시 입력창 초기화
+          onDuplicate?.call();
         } else {
           showPopup(context, '등록에 실패했습니다.\n$decoded');
         }
       }
     } catch (e) {
-      print('🧨 [postSosMessage 오류] $e');
       showPopup(context, '요청 중 오류가 발생했습니다.\n$e');
     }
   }

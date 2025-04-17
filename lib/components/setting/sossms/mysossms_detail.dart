@@ -27,89 +27,74 @@ class _MySosSmsDetailState extends ConsumerState<MySosSmsDetail> {
   void initState() {
     super.initState();
 
-    // ✅ 페이지 진입 시 자동 새로고침
     SharedPreferences.getInstance().then((prefs) {
       final memberNumber = prefs.getString('memberNumber');
       if (memberNumber != null) {
         final parsed = int.parse(memberNumber);
         ref.invalidate(sosMessageProvider(parsed));
         ref.invalidate(sosMessageIdProvider(parsed));
-        print("🔄 MySosSmsDetail 자동 새로고침: memberNumber = $parsed");
       }
     });
   }
 
   Future<void> submitEdit(int memberNumber) async {
-  try {
-    final messageId = await ref.read(sosMessageIdProvider(memberNumber).future);
-    print('🧾 수정할 messageId: $messageId');
-    print('📝 수정할 내용: ${editController.text}');
+    try {
+      final messageId = await ref.read(sosMessageIdProvider(memberNumber).future);
 
-    final result = await ref.read(
-      updateSosMessageProvider((id: messageId, content: editController.text)).future,
-    );
+      final result = await ref.read(
+        updateSosMessageProvider((id: messageId, content: editController.text)).future,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (result) {
-      print('✅ 수정 성공');
-      setState(() => isEditing = false);
-      ref.invalidate(sosMessageProvider(memberNumber));
-      showPopup(context, "메시지가 성공적으로 수정되었어요.");
-    } else {
-      print('❌ 수정 실패');
-      showPopup(context, "메시지 수정에 실패했어요. 다시 시도해주세요.");
-    }
-  } catch (e) {
-    print('🚨 수정 중 에러: $e');
-    if (!mounted) return;
-    showPopup(context, "오류가 발생했어요:\\n$e");
-  }
-}
-
-Future<void> confirmDelete(int memberNumber) async {
-  showDeleteConfirmPopup(
-    context,
-    onConfirm: () async {
-      try {
-        // ✅ 먼저 ref와 삭제 실행
-        final messageId = await ref.read(sosMessageIdProvider(memberNumber).future);
-        print("🧾 삭제할 messageId: $messageId");
-
-        final deleteSosMessage = ref.read(deleteSosMessageProvider);
-        final result = await deleteSosMessage(messageId);
-
-        if (!mounted) return;
-
-        // ✅ 여기서 팝업 닫기
-     Navigator.of(context, rootNavigator: true).pop();
-
-        if (result) {
-          print("✅ 삭제 성공");
-          setState(() {
-            editController.clear();
-            isEditing = false;
-          });
-          ref.invalidate(sosMessageProvider(memberNumber));
-          showPopup(context, "메시지가 삭제되었어요.");
-        } else {
-          showPopup(context, "메시지 삭제에 실패했어요. 다시 시도해주세요.");
-        }
-      } catch (e) {
-        print("🚨 삭제 중 에러: $e");
-        if (!mounted) return;
-        Navigator.pop(context); // 에러 나도 팝업 닫기
-        showPopup(context, "삭제 중 오류 발생:\n$e");
+      if (result) {
+        setState(() => isEditing = false);
+        ref.invalidate(sosMessageProvider(memberNumber));
+        showPopup(context, "메시지가 성공적으로 수정되었어요.");
+      } else {
+        showPopup(context, "메시지 수정에 실패했어요. 다시 시도해주세요.");
       }
-    },
-  onCancel: () {
-  if (!mounted) return;
-  // ❌ 팝업 닫는 건 showDeleteConfirmPopup 안에서 이미 처리함
-  // 여기선 아무 것도 안 해도 됨!
-  print("❌ 삭제 취소됨");
-},
-  );
-}
+    } catch (e) {
+      if (!mounted) return;
+      showPopup(context, "오류가 발생했어요:\n$e");
+    }
+  }
+
+  Future<void> confirmDelete(int memberNumber) async {
+    showDeleteConfirmPopup(
+      context,
+      onConfirm: () async {
+        try {
+          final messageId = await ref.read(sosMessageIdProvider(memberNumber).future);
+
+          final deleteSosMessage = ref.read(deleteSosMessageProvider);
+          final result = await deleteSosMessage(messageId);
+
+          if (!mounted) return;
+
+          Navigator.of(context, rootNavigator: true).pop();
+
+          if (result) {
+            setState(() {
+              editController.clear();
+              isEditing = false;
+            });
+            ref.invalidate(sosMessageProvider(memberNumber));
+            showPopup(context, "메시지가 삭제되었어요.");
+          } else {
+            showPopup(context, "메시지 삭제에 실패했어요. 다시 시도해주세요.");
+          }
+        } catch (e) {
+          if (!mounted) return;
+          Navigator.pop(context);
+          showPopup(context, "삭제 중 오류 발생:\n$e");
+        }
+      },
+      onCancel: () {
+        if (!mounted) return;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +108,7 @@ Future<void> confirmDelete(int memberNumber) async {
 
         return asyncMessage.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => buildEmptyMessage(memberNumber), // ✅ 수정
+          error: (error, _) => buildEmptyMessage(memberNumber),
           data: (detailRaw) {
             if (!isEditing) editController.text = detailRaw;
 
@@ -215,7 +200,6 @@ Future<void> confirmDelete(int memberNumber) async {
     );
   }
 
-  /// ✅ memberNumber를 매개변수로 받도록 수정!
   Widget buildEmptyMessage(int memberNumber) {
     return Center(
       child: Padding(
@@ -231,7 +215,7 @@ Future<void> confirmDelete(int memberNumber) async {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            const SizedBox(height: 120), // 빈칸용
+            const SizedBox(height: 120),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -251,7 +235,7 @@ Future<void> confirmDelete(int memberNumber) async {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  onPressed: () => confirmDelete(memberNumber), // ✅ 수정됨
+                  onPressed: () => confirmDelete(memberNumber),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: signatureColor,
                     foregroundColor: Colors.black,

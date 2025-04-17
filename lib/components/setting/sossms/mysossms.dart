@@ -28,7 +28,6 @@ class _MySosSmsState extends ConsumerState<MySosSms> with TickerProviderStateMix
     // ✅ 탭 전환 시마다 마이메세지 새로고침
     _tabController.addListener(() {
       if (_tabController.index == 0) {
-        print("🔁 마이 메세지 탭 새로고침 요청");
         ref.invalidate(sosMessageProvider(memberNumber));
         ref.invalidate(sosMessageIdProvider(memberNumber));
       }
@@ -39,8 +38,6 @@ class _MySosSmsState extends ConsumerState<MySosSms> with TickerProviderStateMix
       statusBarIconBrightness: Brightness.dark,
       statusBarBrightness: Brightness.light,
     ));
-
-    print("🧾 화면 진입: memberNumber = $memberNumber");
   }
 
   @override

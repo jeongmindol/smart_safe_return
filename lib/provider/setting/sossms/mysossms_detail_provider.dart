@@ -113,8 +113,6 @@ Future<http.Response> _authorizedDelete(String url) async {
   final prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('Authorization');
 
-  print("🔑 AccessToken: $token");
-
   var response = await http.delete(
     Uri.parse(url),
     headers: {
@@ -122,8 +120,6 @@ Future<http.Response> _authorizedDelete(String url) async {
       'Content-Type': 'application/json',
     },
   );
-
-  print("🧨 DELETE 첫 응답: ${response.statusCode} / ${response.body}");
 
   if (response.statusCode == 401 || response.statusCode == 403) {
     final success = await reissueToken();
@@ -136,7 +132,6 @@ Future<http.Response> _authorizedDelete(String url) async {
           'Content-Type': 'application/json',
         },
       );
-      print("🔁 토큰 재발급 후 DELETE 재요청 결과: ${response.statusCode} / ${response.body}");
     } else {
       throw Exception("🚨 [DELETE] 토큰 재발급 실패 → 로그아웃됨");
     }
@@ -197,8 +192,6 @@ final deleteSosMessageProvider = Provider<Future<bool> Function(int)>((ref) {
     final url = '$baseUrl/api/sos-message/$id';
 
     final response = await _authorizedDelete(url);
-    print("🧨 DELETE 응답: ${response.statusCode} / ${response.body}");
-
     return response.statusCode == 200;
   };
 });
