@@ -70,3 +70,13 @@ Future<bool> login(WidgetRef ref, String id, String password) async {
 
   return false;
 }
+
+
+final currentMemberNumberProvider = Provider<int>((ref) {
+  final Map<String, String?> jwt = ref.watch(jwtProvider);
+  final memberNumberStr = jwt['memberNumber'];
+  if (memberNumberStr == null || memberNumberStr.isEmpty) throw Exception('로그인 정보가 없습니다.');
+  final memberNumber = int.tryParse(memberNumberStr);
+  if (memberNumber == null) throw Exception('memberNumber 파싱 실패');
+  return memberNumber;
+});

@@ -1,40 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:smart_safe_return/components/setting/user/user.dart';
+import 'package:smart_safe_return/components/setting/inquiry/inquiry.dart';
+import 'dart:async';
 
 /// ✅ 기본 팝업 함수
 void showPopup(BuildContext context, String message) {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (context) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-      actionsPadding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
-      actionsAlignment: MainAxisAlignment.end,
-      content: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-        child: Text(
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          '알림',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            height: 2,
-          ),
+          style: const TextStyle(fontSize: 16),
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            // ✅ 팝업만 닫도록 rootNavigator 사용!
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          child: const Text('확인'),
-        ),
-      ],
-    ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('확인'),
+          )
+        ],
+      );
+    },
   );
 }
 
+/// ✅ 문의 수정 완료 팝업
+void showInquiryUpdateSuccessPopup(BuildContext context) => showPopup(context, '문의가 수정되었습니다.');
+
+/// ✅ 삭제 완료 팝업 (닫은 후 inquiry 페이지로 이동)
+void showDeleteSuccessPopup(BuildContext context) {
+  // ✅ 기존 팝업이 여러 겹으로 남아 있지 않도록 모두 닫기
+  while (Navigator.canPop(context)) {
+    Navigator.of(context).pop();
+  }
+
+  // ✅ 삭제 완료 알림창 하나만 띄우기
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (popupContext) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          '삭제 완료',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          '삭제가 완료되었습니다.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(popupContext).pop();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Inquiry()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('확인'),
+          )
+        ],
+      );
+    },
+  );
+}
 
 /// ✅ 로그인 필요 팝업
 void showLoginRequiredPopup(BuildContext context) {
@@ -90,11 +148,11 @@ void showLoginRequiredPopup(BuildContext context) {
   );
 }
 
-/// ✅ 삭제 확인 팝업 (다이얼로그만 띄우고, 페이지 이동 없음)
+/// ✅ 삭제 확인 팝업 (확인 시 알림창 닫고 완료 팝업)
 void showDeleteConfirmPopup(
   BuildContext context, {
-  required VoidCallback onConfirm,
-  required VoidCallback onCancel,
+  required FutureOr<bool?> Function()? onConfirm,
+  VoidCallback? onCancel,
 }) {
   showDialog(
     context: context,
@@ -114,31 +172,38 @@ void showDeleteConfirmPopup(
         ),
         actionsAlignment: MainAxisAlignment.spaceEvenly,
         actions: [
-           ElevatedButton(
+          ElevatedButton(
             onPressed: () {
-              // ✅ 여기 수정!!
-              Navigator.of(context, rootNavigator: true).pop(); // 팝업만 닫기
-              onCancel();
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+              }
+              if (onCancel != null) {
+                onCancel();
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: const Text('취소', style: TextStyle(color: Colors.white)),
+            child: const Text('취소'),
           ),
           ElevatedButton(
-            onPressed: onConfirm,
+            onPressed: () async {
+              final result = await onConfirm?.call();
+              if ((result ?? true) && context.mounted && Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+                showDeleteSuccessPopup(context); // ✅ 삭제 완료 알림 표시 및 이동
+              }
+            },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: const Text('삭제', style: TextStyle(color: Colors.white)),
+            child: const Text('확인'),
           ),
         ],
       );
