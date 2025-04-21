@@ -151,8 +151,8 @@ class _MySosSmsDetailState extends ConsumerState<MySosSmsDetail> {
                             setState(() => isEditing = !isEditing);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: signatureColor,
-                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.blue[200],
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -178,8 +178,8 @@ class _MySosSmsDetailState extends ConsumerState<MySosSmsDetail> {
                           ElevatedButton(
                             onPressed: () => confirmDelete(memberNumber),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: signatureColor,
-                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.pink[200],
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -224,7 +224,7 @@ class _MySosSmsDetailState extends ConsumerState<MySosSmsDetail> {
                     setState(() => isEditing = !isEditing);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: signatureColor,
+                    backgroundColor: Colors.blue,
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(

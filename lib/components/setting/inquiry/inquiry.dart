@@ -266,7 +266,7 @@ class _InquiryState extends ConsumerState<Inquiry> with TickerProviderStateMixin
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
+                                    backgroundColor: Colors.blue[200],
                                     foregroundColor: Colors.white,
                                   ),
                                   child: const Text("수정"),
@@ -291,7 +291,7 @@ class _InquiryState extends ConsumerState<Inquiry> with TickerProviderStateMixin
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.redAccent,
+                                    backgroundColor: Colors.pink[200],
                                     foregroundColor: Colors.white,
                                   ),
                                   child: const Text("삭제"),

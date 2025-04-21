@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:smart_safe_return/provider/setting/profile/myprofile_provider.dart';
 import 'package:smart_safe_return/provider/popup_box/popup_box.dart';
 import 'package:smart_safe_return/components/setting/user/user.dart';
@@ -29,6 +31,8 @@ class _MyProfileState extends ConsumerState<MyProfile> {
   };
   bool showWithdrawField = false;
   bool showFinalWithdrawConfirm = false;
+
+  File? selectedImage;
 
   @override
   Widget build(BuildContext context) {
@@ -77,12 +81,52 @@ class _MyProfileState extends ConsumerState<MyProfile> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildProfileItem(context, ref, '아이디', memberData.id),
+                        buildProfileItem(context, ref, '아이디', controllers['아이디']!.text),
                         const SizedBox(height: 20),
                         buildProfileItem(context, ref, '비밀번호', '********'),
                         const SizedBox(height: 20),
-                        buildProfileItem(context, ref, '연락처', formatPhone(memberData.phone)),
+                        buildProfileItem(context, ref, '연락처', formatPhone(controllers['연락처']!.text)),
+                        const SizedBox(height: 20),
+                        buildProfileItem(
+                          context,
+                          ref,
+                          '프로필',
+                          '',
+                          isProfile: true,
+                          profileImage: selectedImage != null
+                              ? FileImage(selectedImage!)
+                              : (memberData.profile != null
+                                  ? NetworkImage(memberData.profile!)
+                                  : const AssetImage('assets/images/profile.png')) as ImageProvider,
+                        ),
+                        if (selectedImage != null)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final success = await updateMyProfile(
+                                  ref: ref,
+                                  imageFile: selectedImage,
+                                );
+                                if (success) {
+                                  ref.invalidate(myProfileProvider);
+                                  setState(() {
+                                    selectedImage = null;
+                                  });
+                                  showPopup(context, '프로필이 수정되었어요!');
+                                } else {
+                                  showPopup(context, '프로필 수정 실패!');
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text("저장"),
+                            ),
+                          ),
                         const SizedBox(height: 40),
+
                         Center(
                           child: TextButton(
                             onPressed: () {
@@ -122,7 +166,7 @@ class _MyProfileState extends ConsumerState<MyProfile> {
                                       final enteredPw = controllers['회원탈퇴비번']!.text;
                                       final isMatch = await checkPasswordMatch(
                                         ref: ref,
-                                        inputId: memberData.id,
+                                        inputId: controllers['아이디']!.text,
                                         inputPassword: enteredPw,
                                       );
 
@@ -185,7 +229,10 @@ class _MyProfileState extends ConsumerState<MyProfile> {
     );
   }
 
-  Widget buildProfileItem(BuildContext context, WidgetRef ref, String title, String value) {
+  Widget buildProfileItem(BuildContext context, WidgetRef ref, String title, String value, {
+    bool isProfile = false,
+    ImageProvider? profileImage,
+  }) {
     final isEdit = isEditing[title] ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,26 +240,44 @@ class _MyProfileState extends ConsumerState<MyProfile> {
         Row(
           children: [
             Expanded(
-              child: Text(
-                '$title: $value',
-                style: const TextStyle(fontSize: 18),
+              child: Row(
+                children: [
+                  Text('$title: ', style: const TextStyle(fontSize: 18)),
+                  if (isProfile && profileImage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: CircleAvatar(radius: 30, backgroundImage: profileImage),
+                    )
+                  else
+                    Text(value, style: const TextStyle(fontSize: 18)),
+                ],
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  isEditing[title] = !(isEditing[title] ?? false);
-                });
+              onPressed: () async {
+                if (isProfile) {
+                  final picker = ImagePicker();
+                  final picked = await picker.pickImage(source: ImageSource.gallery);
+                  if (picked != null) {
+                    setState(() {
+                      selectedImage = File(picked.path);
+                    });
+                  }
+                } else {
+                  setState(() {
+                    isEditing[title] = !(isEditing[title] ?? false);
+                  });
+                }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: signatureColor,
+                backgroundColor: Colors.blue[200],
                 foregroundColor: Colors.black,
               ),
               child: Text(isEdit ? '취소' : '수정'),
             ),
           ],
         ),
-        if (isEdit)
+        if (isEdit && !isProfile)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Row(
@@ -237,12 +302,12 @@ class _MyProfileState extends ConsumerState<MyProfile> {
                   onPressed: () async {
                     final newValue = controllers[title]!.text.trim();
                     bool success = false;
-                    if (title == '아이디') {
-                      success = await updateMyProfile(ref: ref);
-                    } else if (title == '비밀번호') {
+                    if (title == '비밀번호') {
                       success = await updateMyProfile(ref: ref, password: newValue);
                     } else if (title == '연락처') {
                       success = await updateMyProfile(ref: ref, phone: newValue);
+                    } else {
+                      success = await updateMyProfile(ref: ref);
                     }
                     if (success) {
                       setState(() => isEditing[title] = false);
