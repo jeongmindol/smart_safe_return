@@ -17,8 +17,8 @@ Future<void> checkAutoLogin(WidgetRef ref, BuildContext context) async {
   final id = prefs.getString('id');
   final memberNumber = prefs.getString('memberNumber');
 
-  print('🔍 저장된 token: $token');
-  print('🔍 저장된 id: $id');
+  // print('🔍 저장된 token: $token');
+  // print('🔍 저장된 id: $id');
 
   if (token != null && !JwtDecoder.isExpired(token)) {
     ref.read(jwtProvider.notifier).state = {
@@ -28,7 +28,7 @@ Future<void> checkAutoLogin(WidgetRef ref, BuildContext context) async {
       'memberNumber': memberNumber,
     };
 
-    print('✅ 자동 로그인 성공! jwtProvider 상태: ${ref.read(jwtProvider)}');
+    // print('✅ 자동 로그인 성공! jwtProvider 상태: ${ref.read(jwtProvider)}');
   } else {
     print('❌ 자동 로그인 실패: 토큰이 없거나 만료됨');
   }
@@ -36,7 +36,8 @@ Future<void> checkAutoLogin(WidgetRef ref, BuildContext context) async {
 
 /// ✅ 로그인 시도 함수
 Future<bool> login(WidgetRef ref, String id, String password) async {
-  final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/auth/login',
+  final url = Uri.parse(
+    '${dotenv.env['API_BASE_URL']!}/api/auth/login',
   );
 
   final response = await http.post(
@@ -45,12 +46,14 @@ Future<bool> login(WidgetRef ref, String id, String password) async {
     body: jsonEncode({'id': id, 'password': password}),
   );
 
-  print('응답 상태 코드: ${response.statusCode}');
-  print('응답 헤더: ${response.headers}');
+  // print('응답 상태 코드: ${response.statusCode}');
+  // print('응답 헤더: ${response.headers}');
 
   if (response.statusCode == 200) {
-    final accessToken = response.headers['authorization']?.replaceFirst('Bearer ', '');
-    final refreshToken = response.headers['refresh']?.replaceFirst('Bearer ', '');
+    final accessToken =
+        response.headers['authorization']?.replaceFirst('Bearer ', '');
+    final refreshToken =
+        response.headers['refresh']?.replaceFirst('Bearer ', '');
 
     if (accessToken != null && refreshToken != null) {
       try {
@@ -71,7 +74,7 @@ Future<bool> login(WidgetRef ref, String id, String password) async {
           'memberNumber': memberNumber,
         };
 
-        print('✅ 로그인 성공! jwtProvider 상태: ${ref.read(jwtProvider)}');
+        // print('✅ 로그인 성공! jwtProvider 상태: ${ref.read(jwtProvider)}');
 
         return true;
       } catch (e) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:location/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_safe_return/components/home/naver_map/location_marker_widget.dart';
+import 'package:smart_safe_return/provider/popup_box/popup_box.dart';
 import 'package:smart_safe_return/services/location_service.dart';
 import 'package:smart_safe_return/services/permission_service.dart';
 import 'package:smart_safe_return/services/tmap_service.dart';
@@ -45,20 +47,40 @@ class _NaverMapWidgetState extends State<NaverMapWidget> {
       _currentAddress = address ?? "주소 변환 실패";
     });
 
-    _mapController
-        ?.updateCamera(NCameraUpdate.withParams(target: location, zoom: 15));
+    _mapController?.updateCamera(
+      NCameraUpdate.withParams(target: location, zoom: 15),
+    );
+
     await addMarker(
-            context, _mapController, location, "current_location", Colors.red,
-            refMarker: _currentMarker)
-        .then((marker) => _currentMarker = marker);
+      context,
+      _mapController,
+      location,
+      "current_location",
+      Colors.red,
+      refMarker: _currentMarker,
+    ).then((marker) => _currentMarker = marker);
   }
 
   Future<void> _onMapTapped(NPoint point, NLatLng position) async {
+    // ✅ 로그인 체크
+    final prefs = await SharedPreferences.getInstance();
+    final memberNumber = prefs.getString('memberNumber'); // 또는 userNumber
+
+    if (memberNumber == null) {
+      showLoginRequiredPopup(context);
+      return;
+    }
+
     final address = await TmapService.getAddressFromLatLng(position);
     await addMarker(
-            context, _mapController, position, "clicked_location", Colors.blue,
-            refMarker: _clickedMarker)
-        .then((marker) => _clickedMarker = marker);
+      context,
+      _mapController,
+      position,
+      "clicked_location",
+      Colors.blue,
+      refMarker: _clickedMarker,
+    ).then((marker) => _clickedMarker = marker);
+
     setState(() => _clickedAddress = address ?? "주소 변환 실패");
   }
 
@@ -69,9 +91,18 @@ class _NaverMapWidgetState extends State<NaverMapWidget> {
     final end = _clickedMarker!.position;
 
     final routePoints = await TmapService.getWalkingRoute(
-        start.latitude, start.longitude, end.latitude, end.longitude);
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude,
+    );
+
     final seconds = await TmapService.getEstimatedTime(
-        start.latitude, start.longitude, end.latitude, end.longitude);
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude,
+    );
 
     if (routePoints == null || routePoints.isEmpty) return;
 
@@ -85,6 +116,7 @@ class _NaverMapWidgetState extends State<NaverMapWidget> {
       color: Colors.blueAccent,
       width: 10,
     );
+
     _mapController!.addOverlay(_routePolyline!);
 
     if (seconds != null) {
@@ -119,9 +151,13 @@ class _NaverMapWidgetState extends State<NaverMapWidget> {
               _mapController = controller;
 
               if (_currentLocation != null) {
-                await addMarker(context, _mapController, _currentLocation!,
-                        "current_location", Colors.red)
-                    .then((marker) => _currentMarker = marker);
+                await addMarker(
+                  context,
+                  _mapController,
+                  _currentLocation!,
+                  "current_location",
+                  Colors.red,
+                ).then((marker) => _currentMarker = marker);
               }
 
               if (_routePolyline != null) {
