@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_safe_return/provider/setting/inquiry/inquiry_post_provider.dart';
+import 'package:smart_safe_return/provider/popup_box/popup_box.dart';
 
-class InquiryPost extends StatefulWidget {
+class InquiryPost extends ConsumerStatefulWidget {
   const InquiryPost({super.key});
 
   @override
-  State<InquiryPost> createState() => _InquiryPostState();
+  ConsumerState<InquiryPost> createState() => _InquiryPostState();
 }
 
-class _InquiryPostState extends State<InquiryPost> {
+class _InquiryPostState extends ConsumerState<InquiryPost> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
-  final List<String> claimTypes = ['기타', '유형1', '유형2', '유형3', '유형4'];
+  final List<String> claimTypes = [
+    '기타',
+    '회원 정보',
+    '연락처',
+    'SMS',
+    '귀가 로그',
+    '지도',
+    '버그 신고',
+    '보안 문의',
+  ];
   String selectedClaim = '기타';
   bool isExpanded = false;
 
@@ -63,9 +76,10 @@ class _InquiryPostState extends State<InquiryPost> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('클레임 유형',
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w500)),
+                            const Text(
+                              '클레임 유형',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                            ),
                             const SizedBox(height: 8),
                             GestureDetector(
                               onTap: () {
@@ -74,15 +88,13 @@ class _InquiryPostState extends State<InquiryPost> {
                                 });
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                                 decoration: BoxDecoration(
                                   border: Border.all(color: Colors.grey),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(selectedClaim),
                                     Icon(isExpanded
@@ -135,16 +147,41 @@ class _InquiryPostState extends State<InquiryPost> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            print('제목: ${titleController.text}');
-                            print('클레임 유형: $selectedClaim');
-                            print('내용: ${contentController.text}');
+                          onPressed: () async {
+                            final title = titleController.text.trim();
+                            final content = contentController.text.trim();
+
+                            if (title.isEmpty || content.isEmpty) {
+                              showPopup(context, '제목과 내용을 모두 입력해주세요.');
+                              return;
+                            }
+
+                            final prefs = await SharedPreferences.getInstance();
+                            final memberNumberString = prefs.getString('memberNumber');
+                            final memberNumber = int.tryParse(memberNumberString ?? '');
+
+                            if (memberNumber == null) {
+                              showPopup(context, '로그인 정보가 없습니다. 다시 로그인 해주세요.');
+                              return;
+                            }
+
+                            ref.read(postInquiryProvider).postInquiry(
+                                  context: context,
+                                  title: title,
+                                  category: selectedClaim,
+                                  content: content,
+                                  memberNumber: memberNumber,
+                                  onSuccess: () {
+                                    titleController.clear();
+                                    contentController.clear();
+                                  },
+                                );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: signatureColor, // 💙 하늘색!
+                            backgroundColor: signatureColor,
                             foregroundColor: Colors.black,
                           ),
-                          child: const Text('등록'), // ✅ 텍스트 변경!
+                          child: const Text('등록'),
                         ),
                       )
                     ],

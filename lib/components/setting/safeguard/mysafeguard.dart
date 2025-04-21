@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_safe_return/components/setting/safeguard/mysafeguard_post.dart';
 import 'package:smart_safe_return/components/setting/safeguard/mysafeguard_list.dart';
 
@@ -13,21 +14,16 @@ class MySafeguard extends StatefulWidget {
 class _MySafeguardState extends State<MySafeguard>
     with TickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<Map<String, String>> guardians = [
-    {'name': '파이리', 'phone': '010-0525-1234'},
-    {'name': '꼬부기', 'phone': '010-0419-1234'},
-    {'name': '이상해씨', 'phone': '010-0628-1234'},
-    {'name': '피카츄', 'phone': '010-0426-1234'},
-    {'name': '피존투', 'phone': '010-0330-1234'},
-    {'name': '잠만보', 'phone': '010-1231-1234'},
-  ];
+  final GlobalKey<MySafeguardListState> listKey = GlobalKey<MySafeguardListState>();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initUIStyle();
+  }
 
+  void _initUIStyle() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.white,
       statusBarIconBrightness: Brightness.dark,
@@ -36,9 +32,8 @@ class _MySafeguardState extends State<MySafeguard>
   }
 
   void addGuardian(String name, String phone) {
-    setState(() {
-      guardians.add({'name': name, 'phone': phone});
-    });
+    listKey.currentState?.refreshGuardians();
+    _tabController.animateTo(1);
   }
 
   @override
@@ -48,12 +43,12 @@ class _MySafeguardState extends State<MySafeguard>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView( // ✅ 스크롤 가능하게!
-          child: ConstrainedBox(       // ✅ 최소 높이를 화면만큼
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height,
             ),
-            child: IntrinsicHeight(   // ✅ 내부 위젯 높이에 맞춰줌
+            child: IntrinsicHeight(
               child: Column(
                 children: [
                   Container(
@@ -91,14 +86,13 @@ class _MySafeguardState extends State<MySafeguard>
                       ],
                     ),
                   ),
-                  // ❗Expanded는 제거하고, 높이 제한 있는 Container로 감싸기
                   Container(
                     height: MediaQuery.of(context).size.height * 0.7,
                     child: TabBarView(
                       controller: _tabController,
                       children: [
                         MySafeguardPost(onAddGuardian: addGuardian),
-                        MySafeguardList(guardians: guardians),
+                        MySafeguardList(key: listKey),
                       ],
                     ),
                   ),

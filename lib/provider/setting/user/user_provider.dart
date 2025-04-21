@@ -10,15 +10,11 @@ final jwtProvider = StateProvider<Map<String, String?>>((ref) => {});
 
 /// ✅ 앱 시작 시 자동 로그인 체크
 Future<void> checkAutoLogin(WidgetRef ref, BuildContext context) async {
-  print('🟡 checkAutoLogin 실행됨!');
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('Authorization');
   final refresh = prefs.getString('Refresh');
   final id = prefs.getString('id');
   final memberNumber = prefs.getString('memberNumber');
-
-  // print('🔍 저장된 token: $token');
-  // print('🔍 저장된 id: $id');
 
   if (token != null && !JwtDecoder.isExpired(token)) {
     ref.read(jwtProvider.notifier).state = {
@@ -27,27 +23,18 @@ Future<void> checkAutoLogin(WidgetRef ref, BuildContext context) async {
       'id': id,
       'memberNumber': memberNumber,
     };
-
-    // print('✅ 자동 로그인 성공! jwtProvider 상태: ${ref.read(jwtProvider)}');
-  } else {
-    print('❌ 자동 로그인 실패: 토큰이 없거나 만료됨');
   }
 }
 
 /// ✅ 로그인 시도 함수
 Future<bool> login(WidgetRef ref, String id, String password) async {
-  final url = Uri.parse(
-    '${dotenv.env['API_BASE_URL']!}/api/auth/login',
-  );
+  final url = Uri.parse('${dotenv.env['API_BASE_URL']!}/api/auth/login');
 
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({'id': id, 'password': password}),
   );
-
-  // print('응답 상태 코드: ${response.statusCode}');
-  // print('응답 헤더: ${response.headers}');
 
   if (response.statusCode == 200) {
     final accessToken =
@@ -74,18 +61,24 @@ Future<bool> login(WidgetRef ref, String id, String password) async {
           'memberNumber': memberNumber,
         };
 
-        // print('✅ 로그인 성공! jwtProvider 상태: ${ref.read(jwtProvider)}');
-
         return true;
       } catch (e) {
-        print('❌ 토큰 디코딩 오류: $e');
         return false;
       }
     } else {
-      print("❌ 헤더에 토큰이 없습니다.");
       return false;
     }
   }
 
   return false;
 }
+
+final currentMemberNumberProvider = Provider<int>((ref) {
+  final Map<String, String?> jwt = ref.watch(jwtProvider);
+  final memberNumberStr = jwt['memberNumber'];
+  if (memberNumberStr == null || memberNumberStr.isEmpty)
+    throw Exception('로그인 정보가 없습니다.');
+  final memberNumber = int.tryParse(memberNumberStr);
+  if (memberNumber == null) throw Exception('memberNumber 파싱 실패');
+  return memberNumber;
+});

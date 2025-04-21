@@ -1,31 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_safe_return/components/setting/sossms/mysossms_post.dart';
-import 'package:smart_safe_return/components/setting/sossms/mysossms_list.dart';
+import 'package:smart_safe_return/components/setting/sossms/mysossms_detail.dart';
+import 'package:smart_safe_return/provider/setting/sossms/mysossms_detail_provider.dart';
 
-class MySosSms extends StatefulWidget {
+class MySosSms extends ConsumerStatefulWidget {
   const MySosSms({super.key});
 
   @override
-  State<MySosSms> createState() => _MySosSmsState();
+  ConsumerState<MySosSms> createState() => _MySosSmsState();
 }
 
-class _MySosSmsState extends State<MySosSms> with TickerProviderStateMixin {
+class _MySosSmsState extends ConsumerState<MySosSms> with TickerProviderStateMixin {
   late TabController _tabController;
-
-  final TextEditingController titleController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
 
-  final List<String> savedTitles = [
-    '안전 귀가길 SOS',
-    '안전 출근길 SOS',
-    '안전 퇴근길 SOS',
-  ];
+  // ✅ 실제 존재하는 회원 번호로 설정
+  final int memberNumber = 6;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.index = 0;
+
+    // ✅ 탭 전환 시마다 마이메세지 새로고침
+    _tabController.addListener(() {
+      if (_tabController.index == 0) {
+        ref.invalidate(sosMessageProvider(memberNumber));
+        ref.invalidate(sosMessageIdProvider(memberNumber));
+      }
+    });
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.white,
@@ -34,16 +40,9 @@ class _MySosSmsState extends State<MySosSms> with TickerProviderStateMixin {
     ));
   }
 
-  void saveMessage() {
-    print('제목: ${titleController.text}');
-    print('메시지: ${messageController.text}');
-    // TODO: 저장 로직 연동
-  }
-
   @override
   void dispose() {
     _tabController.dispose();
-    titleController.dispose();
     messageController.dispose();
     super.dispose();
   }
@@ -57,7 +56,7 @@ class _MySosSmsState extends State<MySosSms> with TickerProviderStateMixin {
       body: SafeArea(
         child: Column(
           children: [
-            // 상단 앱바
+            // ⬆️ 상단 타이틀 바
             Container(
               color: signatureColor,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -78,7 +77,7 @@ class _MySosSmsState extends State<MySosSms> with TickerProviderStateMixin {
               ),
             ),
 
-            // 탭바
+            // ⬆️ 탭바
             Container(
               color: Colors.white,
               child: TabBar(
@@ -90,28 +89,26 @@ class _MySosSmsState extends State<MySosSms> with TickerProviderStateMixin {
                   color: Color.fromARGB(255, 183, 238, 245),
                 ),
                 tabs: const [
+                  Tab(text: '마이 메세지'),
                   Tab(text: '등록'),
-                  Tab(text: '목록'),
                 ],
               ),
             ),
 
-            // 탭 내용
+            // ⬇️ 탭 내용
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
                   SingleChildScrollView(
-                    // 등록 화면에 스크롤 기능 추가
-                    child: MySosSmsPost(
-                      titleController: titleController,
-                      messageController: messageController,
-                      onSave: saveMessage,
-                    ),
+                    child: const MySosSmsDetail(), // ✅ 자동 새로고침 대상
                   ),
                   SingleChildScrollView(
-                    // 목록 화면에 스크롤 기능 추가
-                    child: MySosSmsList(savedTitles: savedTitles),
+                    child: MySosSmsPost(
+                      messageController: messageController,
+                      memberNumber: memberNumber,
+                      tabController: _tabController, // ✅ 전달
+                    ),
                   ),
                 ],
               ),
