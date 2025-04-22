@@ -89,32 +89,32 @@ class _BackHomeListState extends ConsumerState<BackHomeList> {
                               });
                             },
                             child: ListTile(
-                              tileColor: Colors.white,
-                              title: Text(
-                                "안전귀가 $displayIndex",
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                              ),
-                              trailing: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BackHomeMap(
-                                        routePath: route.routePath,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: signatureColor,
-                                  foregroundColor: Colors.black,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text('지도', style: TextStyle(fontSize: 16)),
-                              ),
-                            ),
+  tileColor: Colors.white,
+  title: Text(
+    "안전귀가 $displayIndex - ${route.formattedDate}",
+    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+  ),
+  trailing: ElevatedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BackHomeMap(
+            routePath: route.routePath,
+          ),
+        ),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: signatureColor,
+      foregroundColor: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    child: const Text('지도', style: TextStyle(fontSize: 16)),
+  ),
+),
                           ),
                           if (isExpanded)
                             Padding(
